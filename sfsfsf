@@ -1,0 +1,3 @@
+ssh Sokka@float -D 9050 // CLOSE
+ssh Sokka@Float -L 1111:192.168.1.39.22
+ssh Aang@localhost -p 1111: -L 
