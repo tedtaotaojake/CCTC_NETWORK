@@ -1,0 +1,7 @@
+ssh Bender@10.50.20.10 -p 1234 -L 21501:172.17.17.28:23
+ssh Bender@172.17.17.17 -p 1234 -R 21502:localhost:4321
+ssh Bender@10.50.20.10 -p 1234 -L 21502:localhost:1234
+ssh Bender@localhost -p 21502 -L 21503:localhost:21502
+ssh Philip@localhost -p 21503
+ssh Professor@localhost -p 21505
+ss -ntlp
