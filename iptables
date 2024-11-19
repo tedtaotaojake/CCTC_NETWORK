@@ -66,4 +66,43 @@ _______________||________________
        |
        LL
 
+# Allow SSH (Port 22)
+sudo iptables -A INPUT -p tcp --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
+sudo iptables -A OUTPUT -p tcp --sport 22 -m state --state ESTABLISHED -j ACCEPT
 
+# Allow TELNET (Port 23)
+sudo iptables -A INPUT -p tcp --dport 23 -m state --state NEW,ESTABLISHED -j ACCEPT
+sudo iptables -A OUTPUT -p tcp --sport 23 -m state --state ESTABLISHED -j ACCEPT
+
+# Allow RDP (Port 3389)
+sudo iptables -A INPUT -p tcp --dport 3389 -m state --state NEW,ESTABLISHED -j ACCEPT
+sudo iptables -A OUTPUT -p tcp --sport 3389 -m state --state ESTABLISHED -j ACCEPT
+
+# Set default policy for all chains to DROP
+sudo iptables -P INPUT DROP
+sudo iptables -P OUTPUT DROP
+sudo iptables -P FORWARD DROP
+
+# Allow ICMP echo-request (ping requests)
+sudo iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
+sudo iptables -A OUTPUT -p icmp --icmp-type echo-reply -j ACCEPT
+
+# Allow TCP and UDP traffic on port 6579
+sudo iptables -A INPUT -p tcp --dport 6579 -j ACCEPT
+sudo iptables -A OUTPUT -p tcp --sport 6579 -j ACCEPT
+sudo iptables -A INPUT -p udp --dport 6579 -j ACCEPT
+sudo iptables -A OUTPUT -p udp --sport 6579 -j ACCEPT
+
+# Allow TCP and UDP traffic on port 4444
+sudo iptables -A INPUT -p tcp --dport 4444 -j ACCEPT
+sudo iptables -A OUTPUT -p tcp --sport 4444 -j ACCEPT
+sudo iptables -A INPUT -p udp --dport 4444 -j ACCEPT
+sudo iptables -A OUTPUT -p udp --sport 4444 -j ACCEPT
+
+# Allow HTTP (Port 80)
+sudo iptables -A INPUT -p tcp --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT
+sudo iptables -A OUTPUT -p tcp --sport 80 -m state --state ESTABLISHED -j ACCEPT
+
+
+sudo iptables -L -v -n
+nc -lvp 9001
