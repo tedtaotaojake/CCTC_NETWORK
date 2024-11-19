@@ -9,6 +9,35 @@ sudo iptables -P FORWWARD ACCEPT
 sudo iptables -F
 sudo iptbales -L
 
+sudo nft add table ip CCTC
+sudo nft add chain ip CCTC INPUT { type filter hook input priotity 0 \; policy accept \;}
+sudo nft add chain ip CCTC OUTPUT { type filter hook output priotity 0 \; policy accept \;}
+sudo nft list ruleset
+sudo nft add rule ip CCTC INPUT icp dport {21-23, 80, 6010-60-12} accept
+sudo nft add rule ip CCTC INPUT icp sport {21-23, 80, 6010-60-12} accept
+sudo nft add rule ip CCTC OUTPUT icp dport {21-23, 80, 6010-60-12} accept
+sudo nft add rule ip CCTC OUTPUT icp sport {21-23, 80, 6010-60-12} accept
+sudo nft add chain ip CCTC INPUT { \; policy drop \;}
+sudo nft add chain ip CCTC OUTPUT { \; policy drop \;}
+
+nft add rule ip NAT POSTROUTING ip saddr 10.10.0.40 oif eth0 snat 144.15.60.11
+nft add rule ip NAT POSTROUTING oif eth0 masquerade
+
+nft add rule ip NAT PREROUTING iif eth0 ip daddr 144.15.60.11 dnat 10.10.0.40
+nft add rule ip NAT PREROUTING iif eth0 tcp dport { 80, 443 } dnat 10.1.0.3
+nft add rule ip NAT PREROUTING iif eth0 tcp dport 80 redirect to 8080
+
+iptables -t mangle -A POSTROUTING -o eth0 -j TTL --ttl-set 128
+iptables -t mangle -A POSTROUTING -o eth0 -j DSCP --set-dscp 26
+
+sudo nft add table ip NAT
+sudo nft list rueset
+sudo nft add chain ip NAT PREROUTING { type nat hook prerouting priority 0 \;}
+sydo nft add chain ip NAT POSTROUTING {type nat hook postrouting priority 0\;}
+sudo nft list ruleset
+sudo nft add rule ip NAT POOSTROUTING ip saddr 172.16.40.10 oif eth0 snat masquerade
+sudo nft list ruleset
+
 
 
 
