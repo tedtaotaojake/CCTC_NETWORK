@@ -5,3 +5,21 @@ ssh Bender@localhost -p 21502 -L 21503:localhost:21502
 ssh Philip@localhost -p 21503
 ssh Professor@localhost -p 21505
 ss -ntlp
+
+telnet 10.50.24.180
+ssh student@10.50.22.220 -R 21501:localhost:8462
+ssh Eric@localhost -p 21501
+exit
+ssh Eric@localhost -p 21501 -L 21502:192.168.100.60:22
+ssh Kenny@localhost -p 21502 -L 21503:10.90.50.140:6481
+ssh Kyle@localhost -p 21503 -L 21504:172.20.21.5:23
+ssh Kyle@172.20.21.4 -p 6481 -R 21505:localhost:22
+ssh Kyle@localhost -p 21503 -L 21506:localhost:21505
+ssh Stan@localhost -p 21506 -D 9050
+proxychains nc localhost 65432
+echo "Oh my god, they killed Kenny!" | md5sum
+
+
+
+
+
