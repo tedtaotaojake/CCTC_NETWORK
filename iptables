@@ -106,3 +106,20 @@ sudo iptables -A OUTPUT -p tcp --sport 80 -m state --state ESTABLISHED -j ACCEPT
 
 sudo iptables -L -v -n
 nc -lvp 9001
+
+
+
+
+
+
+
+
+
+
+sudo iptables -A INPUT -p icmp --icmp-type 8 -d 10.10.0.40 -s 172.16.82.106 -j ACCEPT
+student@blue-host-1-student-15:~$ sudo iptables -A INPUT -p icmp --icmp-type 8 -s 10.10.0.40 -d 172.16.82.106 -j ACCEPT
+student@blue-host-1-student-15:~$ sudo iptables -A OUTPUT -p icmp --icmp-type 8 -s 10.10.0.40 -d 172.16.82.106 -j ACCEPT
+student@blue-host-1-student-15:~$ sudo iptables -A OUTPUT -p icmp --icmp-type 8 -d 10.10.0.40 -s 172.16.82.106 -j ACCEPT
+
+
+467accfb25050296431008a1357eacb1
