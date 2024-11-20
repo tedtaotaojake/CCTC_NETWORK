@@ -19,7 +19,21 @@ ssh Stan@localhost -p 21506 -D 9050
 proxychains nc localhost 65432
 echo "Oh my god, they killed Kenny!" | md5sum
 
-
+bih>ssh Sterling@10.50.23.236
+bih>ssh Sterling@10.50.23.236 -p 22 -L 21501:10.1.2.200:23
+bih>telnet localhost 21501
+lana> ssh Sterling@10.1.2.130 -R 21503:localhost:8976
+bih> ssh Sterling@10.50.23.236 -L 21505:localhost:21503
+bih> ssh Lana@localhost -p 21505
+bih> ssh Lana@localhost -p 21505 -L 21506:10.2.5.20:22
+bih> ssh Cheryl@localhost -p 21506
+bih>ssh Cheryl@localhost -p 21506 -L 21507:10.3.9.39:23
+malory>ssh Cheryl@10.3.9.33 -R 21508:localhost:3597
+bih>ssh Cheryl@localhost -p 21506 -L 21509:localhost:21508
+bih> ssh Malory@localhost -p 21509
+bih> ssh Malory@localhost -p 21509 -D 9050
+malory> ss -ntlp
+bih> proxychains nc localhost xxxxx
 
 
 
