@@ -1,4 +1,4 @@
-
+for i in {1..254} ;do (ping -c 1 192.168.1.$i | grep "bytes from" &) ;done
 sudo tcpdump port 80 and (((ip[2:2] - ((ip[0]&0xf)<<2)) - ((tcp[12]&0xf)) ....
 
 Search for double VLAN Tag.
