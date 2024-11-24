@@ -32,3 +32,788 @@ An attacker is targeting the host 10.0.0.104 with either a TCP full or half open
 
 Provide the number of ports converted to BASE64.
 
+
+
+
+thought process
+scanning t00ls:
+
+from ih
+nmap ip (from proxychains)
+./scan.sh
+nc ip port
+wget -r ftp://ip:portifyouneedone
+wget -r http://ip:portoptional
+
+on a device
+one liner sauce (run on device in question to see what it can see)
+arp -a ?
+ifconfig (see what networks it knows about)
+ip a (ifconfig)
+ss -nltp (see ports)
+
+
+https://miro.com/app/board/o9J_klSqCSY=/
+https://www.browserling.com/tools/ip-to-hex
+https://unix.stackexchange.com/questions/170930/how-to-capture-and-see-packet-contents-with-tcpdump
+https://www.calculator.net/ip-subnet-calculator.html
+https://www.rubyguides.com/2012/02/cli-ninja-ping-sweep/
+
+
+expectations for monday:
+-----------------------
+you will no longer have access to your internet host
+take scan.sh
+download online notes to local desktop
+start by 0800
+6hr exam, split in half
+if you wget a file and its freaking empty, raise your hand
+
+it will not be basic password anymore
+
+for submitting answers, you have to combine the salt of the box and the actual answer to the question
+we will submit questions using md5sum
+
+mostly 3 attempts on questions
+
+some will be multiple choice
+you will only submit the letter
+echo B | md5sum
+those have 2 attempts
+
+salt will always be in the home directory of the box
+
+you ahve to find the creds in the environment for the medium and hard tracks
+cant use ai
+
+
+
+
+
+
+
+
+CAPSTONE BEGEEINNING
+----------------------
+
+START FLAG: crowning achievement
+
+Floating IP of start pivot is: 10.50.20.84
+Any system, you reach or login to, you should check the "/usr/share/cctc/"
+creds: netY_studentX:passwordX (netY = Networking Class Identifier & studentX = Student Number & passwordX = Student Number)
+you can find the tool/command via the "whereis" or "which" commands to see what is available in terms of commands
+you may need to use the full path
+
+When creating tunnels your authorized port ranges to utilize are NSS00 - NSS99
+N = NetX (1-8)
+SS = Student Number - (ie 01 - 40)
+00-99 = available port forward ranges
+i.e. Net1_student1 can use 10100 - 10199 and Net4_student14 can use 41400 - 41499
+
+206XX
+
+questions will not be in ctf, but in the network
+If the question asks you to submit an answer of cheese in all caps converted to base64:
+
+echo "CHEESE" | base64
+Q0hFRVNFCg==
+
+expected to keep opnotes for everything u do
+
+
+
+student@blue-internet-host-student-6:~$ ssh net2_student6@10.50.20.84 -L 20691:localhost:22 -NT
+first hint on capstone-01
+"This system seems to be a pivot for the netwowrk fundamentals and programming sections
+
+# hint on .33 web
+RIPV2 seems to be running on the 10.1.1.0/25 network
+try to sniff out the traffic and find out what networks its advertising in its updates
+what you find will be the ip address of the next environment pivot to access from your internet host
+
+
+CAPSTONE-02
+------------------------------------------------------------------------------------------------------
+share file on .11 (cap02)
+-------------------------
+136971 13704 -rwxr-xr-x   1 root root 14029225 Sep 22  2020 capstone-bpf.pcap
+136949     4 -rwxr-xr-x   1 root root     1129 Oct  9 10:46 Flag-02f.txt
+net2_student6@capstone-02:/usr/share/cctc$ cat Flag-02f.txt 
+
+To answer these 4 questions, you will need to use tcpdump and BPF's against the capstone-bpf.pcap file.
+-------------------------------------------------------------------------------
+Question 1:
+
+Using BPF’s, determine how many packets with a DSCP of 26 being sent to the host 10.0.0.103.
+Provide the number of packets converted to BASE64.
+tcpdump -r capstone-bpf.pcap 'ip[16:4] = 0x0a000067 && ip[1] & 252 = 104' | wc -l
+https://www.browserling.com/tools/ip-to-hex
+ip to hex^
+
+-------------------------------------------------------------------------------
+Question 2:
+
+What is the total number of fragmented packets?
+Provide the number of packets converted to BASE64.
+tcpdump -r capstone-bpf.pcap  'ip[6:2] & 0x3fff != 0x000' | wc -l <- didnt work <- # it works i was on the wrong question
+tcpdump -r capstone-bpf.pcap  'ip[6] & 32 = 32 || ip [6:2] & 8191 > 0' | wc -l <- from slides, gave me the same answer
+tcpdump -r capstone-bpf.pcap  'ip[6] & 32 > 0' | wc -l <- made this myself, dif answer still wrong
+
+-------------------------------------------------------------------------------
+Question 3:
+
+How many packets have the DF flag set and has ONLY the RST and FIN TCP Flags set?
+Provide the number of packets converted to BASE64.
+tcpdump -r capstone-bpf.pcap  'ip[6] & 64 = 64 && tcp[13] = 5' | wc -l <- works
+
+
+-------------------------------------------------------------------------------
+Question 4:
+
+An attacker is targeting the host 10.0.0.104 with either a TCP full or half open scan. Based off the pcap, how many ports are open?
+Provide the number of ports converted to BASE64.
+
+tcpdump -r capstone-bpf.pcap 'ip[12:4] = 0x0a000068 && tcp[13] & 2 = 2 && tcp[13] & 16 = 16'
+because you'll get a syn/ack coming from 104 for each open port. dont put this to wc -l so u can see the ports
+
+-------------------------------------------------------------------------------
+
+hint 02a on ftp server capstone 02
+THere is a webservice running on the port hta correspodns with the RFC That gorverns private ipv4 addressingT
+rfc 1918, port 1918?
+proxychains wget -r http://10.1.1.11:1918
+
+<p>Welcome to the Network Fundamentals Web server on Capstone-02.</p>
+  <br>
+  <p>Go through each of the 5 questions on this website and be prepared to write the answer at an alternate location.</p>
+
+
+Question 1</h2>
+  <p></p>
+  <p>APIPA uses the IP network range of 169.254.0.0/16. What RFC number governs this? Enter only the BASE64 conversion of the number.</p>
+  
+<h2>Question 2</h2>
+  <p></p>
+  <p>IPv6 Uses SLAAC to resolve its Global address from the Router. What multicast destination address does it use to Solicit the router? </p>
+  <br>
+  <p>Enter the address in uppercase and convert to BASE64.</p>
+
+  3
+  p>Which type of ARP is sent in order to perform a MitM attack?</p>
+  <p>Specify the answer in ALL CAPS and convert to BASE64.</p
+
+  <h2>Question 4</h2>
+  <p></p>
+  <p>An attacker built a FRAME that looks like this:</p>
+  <br>
+  <p>| Destination MAC | Source MAC | 0x8100 | 1 | 0x8100 | 100 | 0x0800 | IPv4 Header | TCP Header | Data | FCS |</p>
+  <br>
+  <p>What form of attack is being performed? Supply your 2 word answer in ALL CAPS and convert to BASE64.</p>
+
+q5
+  <p>A router receives a 5000 byte packet on eth0. The MTU for the outbound interface (eth1) is 1500. What would the fragmentation offset increment be with the conditions below?</p>
+  <br>
+  <p>Origional packet Size = 5000 bytes</p>
+  <p>MTU for outboud interface = 1500</p>
+  <p>Packet IHL = 7</p>
+  <br>
+  <p>Supply only the BASE64 conversion of the number.</p>
+
+Offset = (MTU - (IHL x 4)) ÷ 8
+(1500 - (7 x 4)) / 8
+  184
+There is a PCAP Saved in the share folder of this machine that you should look at.
+DONE
+
+capsonte-02 end
+------------------------------------------------------------------
+
+Capstone-03 BEGINNING
+--------------------
+
+
+hint 03a on ftp server
+THere is a webservice running on the por that corresponds with the RFC That governs IPv4 header structure
+791
+
+There is another hint on the student home drive, there is no SSH access to this system so try using FTP With your student credentials
+proxychains ftp 10.1.1.25
+pass <- enter passive mode
+ls
+get hint
+exit, eom hint
+hint:
+There is a listening TCP Port on this system waiting for conenctions
+build a pyhon3 tcp stream sender and send it thru your tunnel to say hi
+send your message as a bytes-like object and decode the response to/from utf-8 toget the double encoded message
+you can use cyberchef to help you decode the message to human readable message
+
+4869 interuppted
+791
+
+END
+---------------------------------------------------------------------
+
+
+Capsonte-04 BEGINNING
+-------------------
+
+hint 04a
+THere is another box (cap05) on a different network that only this systme can see trying to attack this box, on one of the ports associated with the W32/Blaster WOrm. use a sniffing tool to find hte message it is tyring to send
+tcpdump 'tcp[0:2]=80 || tcp[2:2]=80 || tcp[0:2]=4444 || tcp[2:2]=4444 || tcp[0:2]=135 || tcp[2:2]=135 || udp[0:2]=69 || udp[2:2]=69' -vv -i any -X
+I.ju
+	0x0020:  7374 2077 616e 7420 746f 2073 6179 204c  st.want.to.say.L
+	0x0030:  4f56 4520 594f 5520 5341 4e              OVE.YOU.SAN
+
+I.ju
+	0x0020:  7374 2077 616e 7420 746f 2073 6179 204c  st.want.to.say.L
+	0x0030:  4f56 4520 594f 5520 5341 4e              OVE.YOU.SAN
+
+I just want to say LOVE YOU SAN
+
+
+
+hint 04b
+RIPv2 seems to be running on the 10.1.1.0/25 network
+try to sniff out the traffic and find out what networks its advertising in its updates
+what you fild will be the ip address of hte next environment pivot to access from your internet_host
+on a machine in the network 
+# tcpdump 'udp[0:2]=520 || udp[2:2]=520' -vv
+10.50.21.127/32, next hop 10.1.1.126
+
+when ran on 02
+10.1.1.125.route > 224.0.0.9.route: [udp sum ok]
+the ip was in front of my damn face the whole time
+10.50.21.126
+
+------------------------------------------------
+
+
+capstone06 beginning
+---------------------
+10.50.21.126 port 80 wget
+
+hint 06a
+SSH Is running on a higher port althought it only seems to accept connectiosn when it looks liek its coming form a ciscos devices ttl try using iptables toa djust your sending ttl
+the flag for htis systme is the ssh port number
+Conduct your scan in the range of 7000-8000 to minimize the scan time.
+
+on my internet host
+sudo iptables -t mangle -A POSTROUTING -j TTL --ttl-set 255
+mangle is one of the three tables by default, and it deals with packet headers
+nmap 10.50.21.126 -p 7000-8000
+
+end
+------------------------------------
+
+
+
+capstone07
+-------------------
+SSH IS RUNNING ON A HIGHER PORT BUT IT IS NOT ACCESSIBLE FROM THE OUTSIDE
+IT ALSO SEEMS TO USE DIFFERENT USERNAME AND PASSWORD THAN WHAT THE OTHER SYSMTES USE
+HOW CAN WE INTERCEPT THESE CREDENTIALS
+MAYBE ANOTHER SYSTME HAS A TOOL THAT CAN HELP US
+THE FLAG FOR THIS SYSTME IS THE PASSWORD THAT YOU FIND CONVETED TO BASE6
+CREDENTIALS FOR HTIS SYSTEM WILL BE EXATLY WHAT YOU FIND
+
+# net2_student6@capstone-06:~$ tcpdump 'tcp[0:2]=23 || tcp[2:2]=23' -X -vv
+
+WX.netN_comrade
+	0x0040:  580d 0a                                  X..
+
+
+.....]0;net2_com
+	0x0040:  7261 6465 3440 6361 7073 746f 6e65 2d30  rade4@capstone-0
+	0x0050:  373a 207e 071b 5b30 313b 3332 6d6e 6574  7:.~..[01;32mnet
+	0x0060:  325f 636f 6d72 6164 6534 4063 6170 7374  2_comrade4@capst
+	0x0070:  6f6e 652d 3037 1b5b 3030 6d3a 1b5b 3031  one-07.[00m:.[01
+	0x0080:  3b33 346d 7e1b 5b30 306d 2420            ;34m~.[00m$.
+
+Password:
+H0ld.73h.d00
+	0x0040:  723f 0d00 6578 6974 0d00                 r?
+
+H0ld 73h d00r?
+
+end
+-----------------------------------------------------
+
+
+capstone08
+-----------
+
+10.10.10.140
+SSH is running on the port that corresponds with the http status code for moved permanently
+the flag for this systme is the port number converted to base64
+301
+this system seems to be a pivot fo the network recon section
+
+when u wget -r on 301, it shows u htat its actually ssh
+
+
+COMMANDS RAN FOR TUNNELS
+student@blue-internet-host-student-6:~$ ssh net2_student6@10.50.20.84 -L 20691:localhost:22 -NT
+student@blue-internet-host-student-6:~$ ssh net2_student6@10.50.21.126 -p 7777 -L 20692:localhost:7777 -NT
+student@blue-internet-host-student-6:~$ ssh net2_student6@localhost -p 20692 -L 20693:10.2.2.7:23 -NT
+net2_comrade6@capstone-07:~$ ssh net2_student6@10.2.2.6 -p 7777 -R 20694:localhost:2222 -NT
+student@blue-internet-host-student-6:~$ ssh net2_student6@localhost -p 20692 -L 20695:localhost:20694 -NT
+student@blue-internet-host-student-6:~$ ssh net2_comrade6@localhost -p 20695 -L :20696:10.10.10.140:301 -NT 
+
+i have wget for cap 10 and 12
+
+0 is a port, 0 is a port
+
+---------------------------------------------
+
+capstone09
+---------
+
+----------
+
+capstone10
+-------------
+
+hint 10a SSH IS RUNNING ON THE PORT THAT CORRESPONDS WITH THE HTTP STATUS CODE FOR NOT FOUND
+the flag for this system is the port number converted to base64
+404
+
+this system seems to be a pivot for the movement and redirection section
+
+
+
+
+
+
+------------
+
+
+capstone11
+----------
+proxychains scp tgt@192.168.1.10:secret.txt .
+scp using dynamic tunnel
+
+the dot is our cwd
+we dont need to specify /home/tgt bc we automatically get placed there, and /home/tgt might not be his hoem directory
+
+
+capstone12
+-----------
+
+hint 12a
+SSH Is running on the port that corresponds with the http status code for gateway timeout
+the flag ofr this system is the port nubmer converted to base64
+
+504
+
+hint 12b
+this system seems to be a pivot for the network analysis and filtering sections
+
+
+
+
+
+----------
+
+
+cap13
+
+There is a hex encoded pcacp saved in teh share folder of this machine that you will need to extract, decode and xxd, and open with wireshark
+
+To answer these 8 questions, you will need extract the capstone-analysis-HEX-Encoded.pcap file that you will need extract, decode with XXD, and open with Wireshark.
+-------------------------------------------------------------------------------
+
+Question 1:
+
+Which ip address initiated the attack against the FTP server?
+
+Provide the ip address in the x.x.x.x format and converted to Base64.
+
+-------------------------------------------------------------------------------
+
+Question 2:
+
+How many failed attempts to guess the FTP password?
+
+Provide number and converted to Base64.
+
+-------------------------------------------------------------------------------
+
+Question 3:
+
+What is the correct FTP password?
+
+Provide the exact password and converted to Base64.
+-------------------------------------------------------------------------------
+
+Question 4:
+
+What is the system IP that was compromised?
+
+Provide the ip address in the x.x.x.x format and converted to Base64.
+
+-------------------------------------------------------------------------------
+
+Question 5:
+
+What is the FTP version?
+
+Provide the version number only and converted to Base64.
+
+-------------------------------------------------------------------------------
+
+Question 6:
+
+What is the name of the file taken by the attacker?
+
+Provide the filename exactly as shown and converted to Base64.
+
+-------------------------------------------------------------------------------
+
+Question 7:
+
+What was the message contained within the extracted file?
+
+Provide the message exactly as shown and converted to Base64.
+
+-------------------------------------------------------------------------------
+
+Question 8:
+
+What is the name of the file uploaded by the attacker?
+
+Provide the filename exactly as shown and converted to Base64.
+
+-------------------------------------------------------------------------------
+
+
+
+
+
+capt14
+------
+
+
+on web server prt 1999
+Social engineering scams are a particular concern.
+With these scams, attackers present a post intended to get the target user to click on a link.
+That link usually leads to the user downloading some malicious code that has the potential to steal information on the users computer or mobile device.
+These scams are sometimes also called phishing and baiting, as well as click-jacking.
+Whatever they are called, just know that not every post on social media is safe to click on.
+You should take special care to treat every link with suspicion, especially those that look like click bait.
+ Rick Delgado
+
+Security used to be an inconvenience sometimes, but now it is a necessity all the time.
+ Martina Navratilova
+
+-------------------------------------------------------------------------------
+
+Question 1:
+
+How many rule files are on the system?
+
+Provide the number converted to Base64 as your answer.
+
+-------------------------------------------------------------------------------
+
+Question 2:
+
+How many of the rules are currently in use to match on traffic?
+
+Provide the number converted to Base64 as your answer.
+
+-------------------------------------------------------------------------------
+
+Question 3:
+
+Which rule will look for someone doing a null scan ?
+
+Provide only the filename as your answer (i.e. ‘file.rules’) and converted to Base64.
+
+-------------------------------------------------------------------------------
+
+Question 4:
+
+What is the exact Alert Message that is being triggered on the system?
+
+Convert the exact message as you see it and convert it to Base64 for your answer.
+
+---------------------------------------------------------------
+
+Question 5:
+
+From what IP is the attack coming from?
+
+Provide your answer in the x.x.x.x format and converted to Base64.
+
+-------------------------------------------------------------------------------
+
+
+history from capstone
+-------------
+  849  cd activity_resources/
+  850  ls
+  851  cd pcaps/
+  852  ls
+  853  sudo p0f -f attack_analysis1.pcap 
+  854  sudo p0f -r attack_analysis1.pcap 
+  855  sudo p0f -r attack_analysis1.pcap | grep Apache
+  856  terminator
+  857  terminator
+  858  ssh net2_student6@10.50.21.126
+  859  ssh net2_student6@10.50.21.127
+  860  ssh net2_student6@10.50.21.126
+  861  proxychains ssh net2_student6@10.50.21.126
+  862  proxychains ssh net2_student6@10.50.21.127
+  863  exit
+  864  sudo vi noidea.txt
+  865  xxd noidea.txt 
+  866  xxd -r noidea.txt 
+  867  xxd noidea.txt -r
+  868  ssh net2_student@localhost -p 20697
+  869  proxychains ssh 10.10.10.167 -p 404
+  870  echo 404 |base64
+  871  proxychains nc 10.10.10.167 80
+  872  proxychains ping 10.10.10.167
+  873  ssh net2_student6@localhost -p 20696
+  874  proxychains nmap 10.10.10.167
+  875  proxychains nmap -Pn 10.10.10.167
+  876  proxychains nmap -Pn 10.10.10.167 -p 80
+  877  proxychains nmap -Pn 10.10.10.167 -p 21-80
+  878  proxychains nmap -Pn 10.10.10.167 -p 404
+  879  ls
+  880  cd 10.10.10.167
+  881  ls
+  882  eom hint-10a.png 
+  883  eom hint-10b.png 
+  884  ssh net2_comrade6@localhost -p 20695
+  885  ls
+  886  ls 10.10.10.140
+  887  cd 10.10.10.140
+  888  proxychains wget -r http://10.10.10.140
+  889  cd ..
+  890  ls
+  891  cd 10.10.10.182
+  892  ls
+  893  cat welcome.msg 
+  894  eom hint-12a.png 
+  895  eom hint-12b.png 
+  896  ssh net2_student6@localhost -p 20696
+  897  proxychains wget -r http://10.10.10.167
+  898  proxychains wget -r ftp://10.10.10.182
+  899  ssh net2_student6@localhost -p 20696
+  900  proxychains nmap 10.10.10.181
+  901  proxychains nmap 10.10.10.129
+  902  proxychains wget -r http://10.10.10.129
+  903  ls
+  904  cd 10.10.10.129/
+  905  ls
+  906  eom hint-07a.png 
+  907  cat index.html 
+  908  cd ..
+  909  proxychains telnet 10.10.10.129
+  910  ls
+  911  cd 10.10.10.167
+  912  ls
+  913  eom hint-10a.png 
+  914  ls
+  915  eom hint-10a.png 
+  916  eom hint-10b.png 
+  917  cd ..
+  918  ssh net2_student6@localhost -p 20696 -L 20697:10.10.10.167:404 -NT
+  919  proxychains telnet 10.10.10.129
+  920  ssh net2_comrade6@localhost -p 20695
+  921  proxychains ./scan.sh 
+  922  ssh net2_comrade6@localhost -p 20696
+  923  proxychains ./scan.sh 
+  924  ssh net2_comrade6@localhost -p 20696
+  925  ssh net2_student6@localhost -p 20696
+  926  nmap 192.168.10.94
+  927  proxychains nmap 192.168.10.94
+  928  proxychains nmap 192.168.10.74
+  929  proxychains nmap 192.168.10.80
+  930  proxychains wget -r ftp://192.168.10.80
+  931  cd 192.168.10.80/
+  932  ls
+  933  eom hint-11a.png 
+  934  proxychains wget -r http://192.168.10.80:9050
+  935  cd 192.168.10.80\:9050/
+  936  ls
+  937  cat index-1.html 
+  938  echo D | base64
+  939  cat index-2.html 
+  940  echo A | base64
+  941  cat index-3.html 
+  942  echo ASYMMETRIC | base64
+  943  cat index-4.html 
+  944  echo "proxychains tgt@192.168.1.10:/home/secret.txt 147.25.99.1" | base64
+  945  echo "proxychains tgt@192.168.1.10:/home/secret.txt 147.25.99.27" | base64
+  946  echo "proxychains scp tgt@192.168.1.10:/home/secret.txt 147.25.99.1" | base64
+  947  echo "proxychains scp " | base64
+  948  echo "proxychains scp tgt@192.168.1.10:/home/tgt/secret.txt 147.25.99.1" | base64
+  949  echo "proxychains scp outside@localhost:/home/tgt/secret.txt 147.25.99.1 | base64
+  950  echo "proxychains scp outside@localhost:/home/tgt/secret.txt 147.25.99.1" | base64
+  951  echo "proxychains scp tgt@192.168.1.10:secret.txt ." | base64
+  952  ls
+  953  cat index-5.html 
+  954  echo SFTP | base64
+  955  echo 504 | base64
+  956  ssh net2_student6@localhost -p 20696
+  957  cd ..
+  958  proxychains nmap 192.168.10.101
+  959  proxychains nmap 192.168.10.106
+  960  proxychains nmap 192.168.10.111
+  961  proxychains nmap 192.168.10.126
+  962  proxychains wget -r ftp://192.168.10.101
+  963  ls
+  964  cd 192.168.10.101
+  965  ls
+  966  eom hint-13a.png 
+  967  eom hint-13b.png 
+  968  proxychains wget -r hytp://192.168.10.101:584
+  969  proxychains wget -r http://192.168.10.101:584
+  970  ls
+  971  cd 192.168.10.101\:584/
+  972  ls
+  973  cat index-1.html 
+  974  echo "IP.ADDR" | base64
+  975  echo DUMPCAP | base64
+  976  echo "-Z" | base64
+  977  echo CONVERSATIONS | base64
+  978  cat index-2.html 
+  979  echo NETFLOW | basee64
+  980  echo NETFLOW | base64
+  981  cat index-3.html 
+  982  echo TAP | base64
+  983  cat index-4.html 
+  984  echo COMPROMISE | base64
+  985  cat index-5.html 
+  986  echo METAMORPHIC | base64
+  987  proxychains ssh 192.168.10.101
+  988  proxychains ssh net2_student6@192.168.10.101
+  989  cd ..
+  990  proxychains scp net2_student6@localhost:capstone-analysis_HEX-ENCODED.pcap .
+  991  proxychains scp net2_student6@localhost:/usr/share/cctc/capstone-analysis_HEX-ENCODED.pcap .
+  992  ls
+  993  cp capstone-analysis_HEX-ENCODED.pcap capstone-analysis_HEX-ENCODED2.pcap 
+  994  ls
+  995  xxd -r capstone-analysis_HEX-ENCODED2.pcap 
+  996  ls
+  997  cat capstone-analysis_HEX-ENCODED2.pcap 
+  998  xxd -r capstone-analysis_HEX-ENCODED2.pcap capstone-analysis_HEX-ENCODED3.pcap
+  999  wireshark capstone-analysis_HEX-ENCODED3.pcap 
+ 1000  proxychains wget -r ftp://192.168.10.111
+ 1001  ls
+ 1002  cd 192.168.10.111/
+ 1003  ls
+ 1004  eom hint-14a.png 
+ 1005  eom hint-14
+ 1006  eom hint-14b.png 
+ 1007  proxychains wget -r http://192.168.10.111:1999
+ 1008  ls
+ 1009  cd 192.168.10.111\:1999/
+ 1010  ls
+ 1011  cat index.html 
+ 1012  ls
+ 1013  ls -lisa
+ 1014  cd ..
+ 1015  ls
+ 1016  proxychains wget -r http://192.168.10.111:88
+ 1017  ls
+ 1018  cd 192.168.10.111\:88/
+ 1019  ls
+ 1020  cat index.html 
+ 1021  cd ..
+ 1022  proxychains wget -r ftp://192.168.10.111:88
+ 1023  ls
+ 1024  eom hint-14a.png 
+ 1025  proxychains ./scan.sh
+ 1026  exit
+ 1027  proxychains ./scan.sh 
+ 1028  ls
+ 1029  cd 192.168.10.111
+ 1030  ls
+ 1031  proxychains wget -r http://192.168.10.111:2223
+ 1032  ls
+ 1033  cd 192.168.10.111\:2223/
+ 1034  ls
+ 1035  cat index-1.html 
+ 1036  echo POSTROUTING | base64
+ 1037  cat index-2.html 
+ 1038  echo INPUT | base64
+ 1039  cat index-3.html 
+ 1040  echo SIGNATURE | base64
+ 1041  cat index-4.html 
+ 1042  echo MANGLE |base64
+ 1043  cat index-5.html 
+ 1044  echo IP |base64
+ 1045  cd ..
+ 1046  proxychains ssh net2_student6@192.168.10.111
+ 1047  ls
+ 1048  ssh net2_student6@localhost -p 20696
+ 1049  proxychains nmap 192.168.10.94
+ 1050  ssh net2_student6@localhost -p 20696
+ 1051  proxychains nmap 192.168.10.35
+ 1052  proxychains nmap 192.168.10.39
+ 1053  proxychains nmap 192.168.10.62
+ 1054  proxychains nmap 192.168.10.35
+ 1055  proxychains nmap 192.168.10.39
+ 1056  proxychains nmap 192.168.10.62
+ 1057  proxychains wget -r ftp://192.168.10.39
+ 1058  ls
+ 1059  cd 192.168.10.39
+ 1060  ls
+ 1061  eom hint-09a.png 
+ 1062  proxychains wget -r http://192.168.10.39:4444
+ 1063  ls
+ 1064  cd 192.168.10.39\:4444/
+ 1065  ls
+ 1066  cat index.html 
+ 1067  cd ..
+ 1068  cat hint-09a.png i
+ 1069  eom hint-09a.png 
+ 1070  proxychains wget -r http://192.168.10.39:5443
+ 1071  proxychains wget -r http://192.168.10.39:8080
+ 1072  proxychains wget -r http://192.168.10.39:580
+ 1073  proxychains wget -r http://192.168.10.39:5580
+ 1074  proxychains nmap 192.168.10.39 -p 1-10000
+ 1075  proxychains wget -r http://192.168.10.39:3790
+ 1076  ls
+ 1077  cd 192.168.10.39\:3790/
+ 1078  ls
+ 1079  cat index-1.html 
+ 1080  echo VULNERABILITY ASSESSMENT | base64
+ 1081  echo "ACTIVE INTERNAL" | base64
+ 1082  cat index-2.html 
+ 1083  echo RST | base64
+ 1084  cat index-3.html 
+ 1085  echo WHOIS | base64
+ 1086  cat index-4.html 
+ 1087  echo IDLE | base64
+ 1088  cat index-5.html 
+ 1089  echo nc 10.1.0.1 1111 | base64 
+ 1090  cd ..
+ 1091  proxychains ssh net2_student6@10.1.1.25
+ 1092  proxychains ssh net2_student6@10.1.1.25 -p 271
+ 1093  proxychains ssh net2_student6@10.1.1.25 -p 791
+ 1094  proxychains ./scan.sh 
+ 1095  ssh net2_student6@localhost -p 20691
+ 1096  ls
+ 1097  sudo vi script25.py 
+ 1098  ./script
+ 1099  ./script25.py 
+ 1100  proxychains ./script25.py 
+ 1101  cat script25.py 
+ 1102  sudo vi script25.py 
+ 1103  proxychains ./script25.py 
+ 1104  echo NDIgNjEgN2EgNjkgNmUgNjcgNjE= | base64
+ 1105  echo Bazinga | base64
+ 1106  history
+
+
+
+
+
+
+
+
